@@ -57,7 +57,7 @@ Prepare two cameras and Trained YOLOv5 weights.
 #### Samples
 
 <p align='center'>
-<img src="github_fig/UI.jpg" height="260px" width='413px'> 
+<img src="github_fig/UI.jpg" height="440px" width='680px'> 
 </div>
 
 
