@@ -27,6 +27,8 @@ Prepare two cameras and Trained YOLOv5 weights.
     |-- Detection results
         |-- 0.jpg
         |-- 1.jpg
+        |-- Left_camera_location.txt
+        |-- Right_camera_location.txt
     |-- Photographed images
         |-- 0.jpg
         |-- 1.jpg
@@ -63,6 +65,6 @@ Prepare two cameras and Trained YOLOv5 weights.
 
 #### 儲存左右相機偵測到的跌倒者之座標
 <p align='center'>
-<img src="github_fig/location_files.jpg" height="250px" width='350px'> 
+<img src="github_fig/location_files.jpg" height="300px" width='550px'> 
 </div>
 
