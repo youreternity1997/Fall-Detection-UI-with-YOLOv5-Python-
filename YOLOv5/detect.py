@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, './YOLOv5')
 
 # source, weights, view_img, save_txt, imgsz, nosave, project, name, exist_ok
-def YOLOdetect(save_img=False, nosave=False, project='Detection results', exist_ok=True, device='cpu', source='Photographed images', weights=['./YOLOv5/runs/train/7_496124/weights/best.pt'], view_img=False, save_txt=False, imgsz=640, name='', augment=False, conf_thres=0.25, iou_thres=0.45, classes=None, agnostic_nms=False, save_conf=False, update=False):
+def YOLOdetect(left_cam=0, right_cam=1, save_img=False, nosave=False, project='Detection results', exist_ok=True, device='cpu', source='Photographed images', weights=['./YOLOv5/runs/train/7_496124/weights/best.pt'], view_img=False, save_txt=False, imgsz=640, name='', augment=False, conf_thres=0.25, iou_thres=0.45, classes=None, agnostic_nms=False, save_conf=False, update=False):
     print('-----------------------------------------')
     print('YOLOdetect')
     Pred_loaction_dict = {}
@@ -104,6 +104,17 @@ def YOLOdetect(save_img=False, nosave=False, project='Detection results', exist_
             txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # img.txt
             s += '%gx%g ' % img.shape[2:]  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+            
+            
+            # 刪除座標txt檔案
+            if p.name == (str(left_cam)+".jpg"):
+                f = open(str(save_dir) +'/'+ 'Left_camera_location.txt', 'w')
+                f = open(str(save_dir) +'/'+ 'Left_camera_location.txt', 'w').close() # .close()清空
+            else:
+                if p.name == (str(right_cam)+".jpg"):
+                    f = open(str(save_dir) +'/'+ 'Right_camera_location.txt', 'w')
+                    f = open(str(save_dir) +'/'+ 'Right_camera_location.txt', 'w').close() # .close()清空
+            
             if len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
@@ -125,21 +136,12 @@ def YOLOdetect(save_img=False, nosave=False, project='Detection results', exist_
                         label = f'{names[int(cls)]} {conf:.2f}'
                         #plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
                         if names[int(cls)] == 'standing':
-                            #print('ty_im0=', type(im0))
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
                             rw = xyxy[2] - xyxy[0]
-                            #print('rw:' + str(rw))
-                            f = open(str(save_dir) +'/'+ str(p.name[0:-4]) + '_red.txt', 'a+')
-                            f.write('{}\n'.format(rw))
-                            f.close()
                         elif names[int(cls)] == 'falling':
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
                             xc = (xyxy[0] + xyxy[2]) / 2  # x center
                             yb = xyxy[3]
-                            #print('ty_xc=', type(xc))
-                            #print('xc=', xc)
-                            #print('ty_yb=', type(yb))
-                            #print('yb=', yb)
                             cv2.circle(im0, (int(xc), int(yb)), 10, (0, 0, 255), -1)
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             text = str(int(xc))+','+str(int(yb))
@@ -147,53 +149,30 @@ def YOLOdetect(save_img=False, nosave=False, project='Detection results', exist_
                             spear = []
                             spear.append(xc)
                             spear.append(yb)
-                            #print(spear) #[tensor(1241.), tensor(908.)]
                             sw = xyxy[2] - xyxy[0]
-                            #print('sw:' + str(sw))
-                            f = open(str(save_dir) +'/'+ str(p.name[0:-4]) + '_spear.txt', 'a+')
-                            f.write('{}\n'.format(sw))
-                            f.close()
-                            
                             # Record location
-                            Object_loc = "(X: "+ str(int(xc)) +", "+"Y: "+str(int(yb))+")"+"/"
-                            Objects_loc += Object_loc
-                            #print('Objects_loc=', Objects_loc)
+                            object_loc = "(X: "+ str(int(xc)) +", "+"Y: "+str(int(yb))+")"+"/"
+                            Objects_loc += object_loc
+                            
+                            if p.name == (str(left_cam)+".jpg"):
+                                f = open(str(save_dir) +'/'+ 'Left_camera_location.txt', 'a+')
+                                f.write('{}\n'.format(object_loc))
+                                f.close()
+                            else:
+                                if p.name == (str(right_cam)+".jpg"):
+                                    f = open(str(save_dir) +'/'+ 'Right_camera_location.txt', 'a+') 
+                                    f.write('{}\n'.format(object_loc))
+                                    f.close()
                             
                         elif names[int(cls)] == 'sitting':
                             #print('ty_im0=', type(im0))
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
                             
-           
             image_name = os.path.split(path)[1]
             pred_info = Objects_loc
             Pred_loaction_dict[image_name] = pred_info
             print('pred_info=', pred_info)
                                      
-            
-            if os.path.isfile(str(save_dir) +'/'+ str(p.name[0:-4]) + '_red.txt') & os.path.isfile(str(save_dir) +'/'+ str(p.name[0:-4]) + '_spear.txt'):
-                f = open(str(save_dir) +'/'+ str(p.name[0:-4]) + '_red.txt', 'r')
-                red_list = []
-                for line in f:
-                    red_list.append(line[0:-2])
-                red_list = [float(x) for x in red_list]
-                red_list = [round(y) for y in red_list]
-                #print(red_list)
-                f.close()
-                f = open(str(save_dir) +'/'+ str(p.name[0:-4]) + '_spear.txt', 'r')
-                spear_list = []
-                for line in f:
-                    spear_list.append(line[0:-2])
-                spear_list = [float(a) for a in spear_list]
-                spear_list = [round(b) for b in spear_list]
-                #print(spear_list)
-                f.close()
-                mean = np.mean(list(red_list))
-                #print(mean)
-                spearwidth = ((list(spear_list))/mean) * 1.8
-                #print('spearwidth:' + str(spearwidth))
-                #os.remove(str(save_dir) +'/'+ str(p.name[0:-4]) + '_red.txt')
-                #os.remove(str(save_dir) +'/'+ str(p.name[0:-4]) + '_spear.txt')
-
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
 

@@ -61,3 +61,8 @@ Prepare two cameras and Trained YOLOv5 weights.
 </div>
 
 
+#### 儲存左右相機偵測到的跌倒者之座標
+<p align='center'>
+<img src="github_fig/location_files.jpg" height="250px" width='350px'> 
+</div>
+
